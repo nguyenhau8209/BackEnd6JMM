@@ -1,9 +1,10 @@
 const mongoose = require("mongoose");
+require("dotenv").config();
 
+const local_url = process.env.MONGODB_LOCAL_URL;
+const network_url = process.env.MONGODB_NETWORK_URL;
 mongoose
-  .connect(
-    "mongodb+srv://vinhdev31:congvinh2003@cluster0.rmuqlpf.mongodb.net/6JMM"
-  )
+  .connect(local_url)
   .then(() => console.log("Connected successfully!"))
   .catch((err) => console.log("connected false: ", err));
 
