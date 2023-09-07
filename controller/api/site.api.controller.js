@@ -39,6 +39,11 @@ exports.login = async (req, res, next) => {
 exports.register = async (req, res, next) => {
   try {
     const user = new acountModel.acount(req.body);
+    const checkEmail = await acountModel.acount.findOne({ email: user?.email });
+    console.log(checkEmail);
+    if (checkEmail) {
+      return res.status(404).json({ status: 404, message: "Email is exited!" });
+    }
     const salt = await bcrypt.genSalt(15);
     user.password = await bcrypt.hash(req.body.password, salt);
     let new_user = await user.save();
