@@ -10,5 +10,5 @@ router.post("/login", siteController.login);
 router.post("/register", siteController.register);
 router.get("/logout", authMidleWare.apiAuth, siteController.logout);
 router.get("/profile", authMidleWare.apiAuth, siteController.detailProfile);
-
+router.get("/verify/:id/:token", siteController.verifyEmail);
 module.exports = router;

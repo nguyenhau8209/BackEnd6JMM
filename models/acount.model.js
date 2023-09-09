@@ -9,7 +9,7 @@ const acountSchema = new db.mongoose.Schema(
     fullname: { type: String, require: false },
     email: { type: String, require: true },
     password: { type: String, require: true },
-    token: { type: String, require: false },
+    verified: { type: Boolean, default: false, require: true },
   },
   {
     timestamps: true,

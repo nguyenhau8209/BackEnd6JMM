@@ -3,25 +3,32 @@ const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const SIGN_PRIVATE = process.env.SIGN_PRIVATE;
 
+// Middleware xác thực API
 const apiAuth = async (req, res, next) => {
+  // Lấy token từ tiêu đề "Authorization" của yêu cầu
   let header_token = req.header("Authorization");
 
-  if (typeof header_token == "undefined") {
-    res.status(403).json({ status: 403, message: "unknown token" });
+  if (!header_token) {
+    return res.status(403).json({ status: 403, message: "unknown token" });
   }
+
+  // Loại bỏ tiền tố "Bearer " để lấy token thô
   const token = header_token.replace("Bearer ", "");
-  console.log(token);
+
   try {
+    // Xác minh và giải mã token
     const data = jwt.verify(token, SIGN_PRIVATE);
-    console.log(data?._id);
+
+    // Tìm người dùng dựa trên dữ liệu từ token
     const user = await acountModal.acount.findOne({
-      _id: data._id,
-      token: token,
+      _id: data?._id,
     });
-    console.log(user);
-    if (!user) {
+
+    if (!user || !token) {
       throw new Error("unknown user");
     }
+
+    // Gắn thông tin người dùng và token vào yêu cầu
     req.user = user;
     req.token = token;
     next();
