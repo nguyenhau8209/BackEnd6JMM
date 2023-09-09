@@ -62,9 +62,37 @@ exports.register = async (req, res, next) => {
     const checkEmail = await acountModel.acount.findOne({ email: user.email });
 
     if (checkEmail) {
-      return res
-        .status(404)
-        .json({ status: 404, message: "Email already exists!" });
+      // Nếu email đã tồn tại trong cơ sở dữ liệu
+      if (checkEmail.verified) {
+        // Nếu tài khoản đã được xác thực, trả về thông báo lỗi
+        return res
+          .status(409)
+          .json({
+            status: 409,
+            message: "Email already exists and is verified.",
+          });
+      } else {
+        // Nếu tài khoản chưa được xác thực, cập nhật lại thông tin và gửi lại email xác thực
+        // Cập nhật thông tin cần thiết (ví dụ: password, thông tin mới)
+        checkEmail.password = user.password; // Thay đổi mật khẩu nếu cần
+        // Cập nhật thông tin khác nếu cần
+        await checkEmail.save();
+
+        // Tạo và gửi lại email xác thực
+        const newVerificationToken = await new Token({
+          userId: checkEmail._id,
+          token: require("crypto").randomBytes(32).toString("hex"),
+        }).save();
+
+        const emailMessage = `${process.env.BASE_URL}users/verify/${checkEmail.id}/${newVerificationToken.token}`;
+        await sendEmail(checkEmail.email, "Reverify Email", emailMessage);
+
+        return res.status(200).json({
+          status: 200,
+          message:
+            "Email already exists but is not verified. A verification email has been sent again.",
+        });
+      }
     }
 
     // Tạo salt và mã hóa mật khẩu

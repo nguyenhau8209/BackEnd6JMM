@@ -18,13 +18,14 @@ const apiAuth = async (req, res, next) => {
   try {
     // Xác minh và giải mã token
     const data = jwt.verify(token, SIGN_PRIVATE);
+    console.log("data ", data);
 
     // Tìm người dùng dựa trên dữ liệu từ token
     const user = await acountModal.acount.findOne({
       _id: data?._id,
     });
 
-    if (!user || !token) {
+    if (!user) {
       throw new Error("unknown user");
     }
 
