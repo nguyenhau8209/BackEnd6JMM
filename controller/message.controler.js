@@ -1,4 +1,5 @@
 const messageModel = require("../models/message.model");
+const runPrompt = require("../utils/convertMessage");
 
 // Lấy danh sách tin nhắn
 exports.getListMessage = async (req, res, next) => {
@@ -26,13 +27,25 @@ exports.getListMessage = async (req, res, next) => {
 // Tạo tin nhắn mới
 exports.createMessage = async (req, res, next) => {
   if (req.method == "POST") {
-    let message = new messageModel.message();
-    message.message = req.body.message;
-    message.userID = req.body.userID;
-
     try {
+      // Lưu tin nhắn ban đầu vào cơ sở dữ liệu
+      let message = new messageModel.message();
+      message.message = req.body.message;
+      message.userID = req.body.userID;
       const newMessage = await message.save();
+
       console.log("newMessage ", newMessage);
+
+      // Gọi hàm convertMessage để lấy thông tin
+      const convertMessage = await runPrompt(newMessage?.message);
+
+      // Cập nhật tin nhắn ban đầu với thông tin từ convertMessage
+      newMessage.price = convertMessage?.price;
+      newMessage.code = convertMessage?.code;
+
+      // Lưu lại tin nhắn đã cập nhật
+      await newMessage.save();
+
       return res.status(201).json({
         status: 201,
         data: newMessage,
