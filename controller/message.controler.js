@@ -24,6 +24,29 @@ exports.getListMessage = async (req, res, next) => {
   }
 };
 
+exports.getMessageById = async (req, res, next) => {
+  try {
+    const messageId = req.params.id;
+    const messageById = await messageModel.message.findById(messageId);
+
+    // Kiểm tra nếu không có tin nhắn
+    if (!messageById) {
+      return res
+        .status(401)
+        .json({ status: 401, message: "Message not found" });
+    }
+
+    return res.status(200).json({
+      status: 200,
+      data: messageById,
+      message: "Get message successfully!",
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ status: 500, message: error.message });
+  }
+};
+
 // Tạo tin nhắn mới
 exports.createMessage = async (req, res, next) => {
   if (req.method == "POST") {

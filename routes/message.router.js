@@ -4,9 +4,15 @@ const messageController = require("../controller/message.controler");
 const authMidleWare = require("../middleWare/auth.middlewere");
 
 router.get(
-  "/get-message",
+  "/get-list-message",
   authMidleWare.apiAuth,
   messageController.getListMessage
+);
+
+router.get(
+  "/get-message/:id",
+  authMidleWare.apiAuth,
+  messageController.getMessageById
 );
 router.post(
   "/create-message",
