@@ -10,7 +10,6 @@ exports.getCategories = async (req, res) => {
 
     // Tạo một mảng chứa mã danh mục của từng danh mục
     const codeCategory = categories.map((value) => value.code);
-
     // Lặp qua danh sách mã danh mục để tính tổng giá trị của tin nhắn trong mỗi danh mục
     for (let v of codeCategory) {
       // Tìm các tin nhắn có mã danh mục tương ứng

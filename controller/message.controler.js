@@ -1,3 +1,4 @@
+const { acount } = require("../models/acount.model");
 const messageModel = require("../models/message.model");
 const runPrompt = require("../utils/convertMessage");
 
@@ -55,6 +56,18 @@ exports.createMessage = async (req, res, next) => {
       let message = new messageModel.message();
       message.message = req.body.message;
       message.userID = req.body.userID;
+      const findUserID = await acount.findById(req.body.userID);
+      console.log(findUserID);
+      if (!findUserID) {
+        return res
+          .status(404)
+          .json({ status: 404, message: "UserID not exited" });
+      }
+      if (!req.body.message) {
+        return res
+          .status(404)
+          .json({ status: 404, message: "message not exited" });
+      }
       const newMessage = await message.save();
 
       console.log("newMessage ", newMessage);
