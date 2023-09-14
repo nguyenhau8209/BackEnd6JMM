@@ -65,12 +65,10 @@ exports.register = async (req, res, next) => {
       // Nếu email đã tồn tại trong cơ sở dữ liệu
       if (checkEmail.verified) {
         // Nếu tài khoản đã được xác thực, trả về thông báo lỗi
-        return res
-          .status(409)
-          .json({
-            status: 409,
-            message: "Email already exists and is verified.",
-          });
+        return res.status(409).json({
+          status: 409,
+          message: "Email already exists and is verified.",
+        });
       } else {
         // Nếu tài khoản chưa được xác thực, cập nhật lại thông tin và gửi lại email xác thực
         // Cập nhật thông tin cần thiết (ví dụ: password, thông tin mới)
@@ -84,7 +82,7 @@ exports.register = async (req, res, next) => {
           token: require("crypto").randomBytes(32).toString("hex"),
         }).save();
 
-        const emailMessage = `${process.env.BASE_URL}users/verify/${checkEmail.id}/${newVerificationToken.token}`;
+        const emailMessage = `${process.env.BASE_URL_SERVICE}users/verify/${checkEmail.id}/${newVerificationToken.token}`;
         await sendEmail(checkEmail.email, "Reverify Email", emailMessage);
 
         return res.status(200).json({
@@ -109,7 +107,7 @@ exports.register = async (req, res, next) => {
     }).save();
 
     // Tạo thông điệp xác minh email và gửi email xác minh
-    const message = `${process.env.BASE_URL}users/verify/${new_user.id}/${token.token}`;
+    const message = `${process.env.BASE_URL_SERVICE}users/verify/${new_user.id}/${token.token}`;
     await sendEmail(new_user.email, "Verify Email", message);
 
     return res.status(201).json({
