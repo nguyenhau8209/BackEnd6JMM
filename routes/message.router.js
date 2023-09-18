@@ -5,7 +5,7 @@ const authMidleWare = require("../middleWare/auth.middlewere");
 
 router.get(
   "/get-list-message",
-  authMidleWare.apiAuth,
+  // authMidleWare.apiAuth,
   messageController.getListMessage
 );
 
@@ -22,7 +22,7 @@ router.post(
 
 router.put(
   "/update-message/:id",
-  authMidleWare.apiAuth,
+  // authMidleWare.apiAuth,
   messageController.updateMessage
 );
 
