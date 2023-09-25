@@ -31,33 +31,46 @@ exports.getCategories2 = async (req, res) => {
   const startDate = req.query.startDate;
   const endDate = req.query.endDate;
   let codeTotal = [];
+
   try {
-    // Kiểm tra xem có tồn tại userID trong request body không
+    // Kiểm tra xem có tồn tại userID trong request query không
     if (!userID) {
       return res.status(400).json({ status: 400, message: "Invalid userID" });
     }
 
+    // Kiểm tra xem startDate và endDate có đúng định dạng ngày không
+    if (!isValidDate(startDate) || !isValidDate(endDate)) {
+      return res
+        .status(400)
+        .json({ status: 400, message: "Invalid date format" });
+    }
+
     // Lấy danh sách tất cả các danh mục từ cơ sở dữ liệu
     const categories = await Category.find();
+
+    // Lấy danh sách tin nhắn dựa trên userID và khoảng thời gian
     const findMessageByDate = await messageModal.message.find({
       userID,
       createdAt: { $gte: startDate, $lte: endDate },
     });
-    // Duyệt qua từng danh mục để tính tổng giá trị
-    for (const category of categories) {
-      const categoryCode = category.code;
 
-      // Lọc tin nhắn chỉ cần những tin nhắn thuộc danh mục hiện tại
-      const categoryMessages = findMessageByDate.filter(
-        (message) => message.code === categoryCode
-      );
+    await Promise.all(
+      categories.map(async (category) => {
+        const categoryCode = category.code;
 
-      // Tính tổng giá trị của các tin nhắn trong danh mục hiện tại
-      const total = categoryMessages.reduce((accumulator, message) => {
-        return accumulator + parseFloat(message.price || 0);
-      }, 0);
-      codeTotal.push({ category: category, total: total });
-    }
+        // Lọc tin nhắn chỉ cần những tin nhắn thuộc danh mục hiện tại
+        const categoryMessages = findMessageByDate.filter(
+          (message) => message.code === categoryCode
+        );
+
+        // Tính tổng giá trị của các tin nhắn trong danh mục hiện tại
+        const total = categoryMessages.reduce((accumulator, message) => {
+          return accumulator + parseFloat(message.price || 0);
+        }, 0);
+
+        codeTotal.push({ category: category, total: total });
+      })
+    );
 
     // Trả về phản hồi thành công với danh sách danh mục đã cập nhật
     return res.status(200).json({
@@ -66,8 +79,14 @@ exports.getCategories2 = async (req, res) => {
       message: "Get categories success",
     });
   } catch (error) {
-    // Xử lý lỗi: In lỗi ra console và trả về phản hồi lỗi
+    // Xử lý lỗi: In lỗi ra console và trả về phản hồi lỗi chi tiết
     console.error(error);
     return res.status(500).json({ status: 500, message: error.message });
   }
 };
+
+// Kiểm tra xem định dạng ngày có hợp lệ không
+function isValidDate(dateString) {
+  const dateRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
+  return dateRegex.test(dateString);
+}
