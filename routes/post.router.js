@@ -2,7 +2,6 @@ const express = require("express");
 const routes = express.Router();
 const cloudinary = require("../middleWare/cloudinary.middlewere");
 const postController = require("../controller/post.controller");
-const middleWare = require("../middleWare/auth.middlewere");
 routes.post("/add_Post", cloudinary.single("image"), postController.addpost);
 routes.get("/get_post", postController.getpost);
 routes.delete("/delete_post/:id", postController.deletepost);
