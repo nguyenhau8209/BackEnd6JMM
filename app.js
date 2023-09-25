@@ -8,6 +8,8 @@ var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 const messageRouter = require("./routes/message.router");
 const categoryModule = require("./routes/categories.router");
+const totalModule = require("./routes/totals.router");
+
 var app = express();
 
 // view engine setup
@@ -24,6 +26,7 @@ app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/message", messageRouter);
 app.use("/category", categoryModule);
+app.use("/total", totalModule);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

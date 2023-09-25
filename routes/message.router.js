@@ -4,30 +4,26 @@ const messageController = require("../controller/message.controler");
 const authMidleWare = require("../middleWare/auth.middlewere");
 
 router.get(
-  "/get-list-message",
+  "/messages",
   authMidleWare.apiAuth,
   messageController.getListMessage
 );
 
 router.get(
-  "/get-message/:id",
+  "/message/:id",
   authMidleWare.apiAuth,
   messageController.getMessageById
 );
-router.post(
-  "/create-message",
-  authMidleWare.apiAuth,
-  messageController.createMessage
-);
+router.post("/message", authMidleWare.apiAuth, messageController.createMessage);
 
 router.put(
-  "/update-message/:id",
+  "/message/:id",
   authMidleWare.apiAuth,
   messageController.updateMessage
 );
 
 router.delete(
-  "/delete-message/:id",
+  "/message/:id",
   authMidleWare.apiAuth,
   messageController.deleteMessage
 );
