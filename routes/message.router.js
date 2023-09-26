@@ -28,4 +28,17 @@ router.delete(
   messageController.deleteMessage
 );
 
+router.get(
+  '/loadmore-message',
+  // ?limit=$limit&skip=$skip
+  authMidleWare.apiAuth,
+  messageController.loadMoreMessages
+);
+
+router.get(
+  '/filter-message',
+  authMidleWare.apiAuth,
+  messageController.filterMessagesbyCode
+);
+
 module.exports = router;
