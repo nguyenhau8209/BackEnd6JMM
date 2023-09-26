@@ -155,7 +155,7 @@ exports.deleteMessage = async (req, res, next) => {
 // Lấy list message theo limit
 exports.loadMoreMessages = async (req, res, next) => {
     try {
-        const { userId, code, limit, skip } = req.query // Nhận limit và skip từ frontend
+        const { userid, code, limit, skip } = req.query // Nhận limit và skip từ frontend
 
         // Chuyển limit và skip thành số nguyên
         const limitInt = parseInt(limit)
@@ -163,7 +163,7 @@ exports.loadMoreMessages = async (req, res, next) => {
 
         // Lấy danh sách tin nhắn dựa trên limit và skip
         const messageList = await messageModel.message
-            .find({ code: code, userID: userId })
+            .find({ code: code, userID: userid })
             .limit(limitInt)
             .skip(skipInt)
 
