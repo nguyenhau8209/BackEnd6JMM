@@ -8,6 +8,8 @@ var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 const messageRouter = require("./routes/message.router");
 const categoryModule = require("./routes/categories.router");
+const post = require("./routes/post.router");
+const token = require('./routes/token_gg.router')
 const totalModule = require("./routes/totals.router");
 
 var app = express();
@@ -26,6 +28,8 @@ app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/message", messageRouter);
 app.use("/category", categoryModule);
+app.use("/post", post);
+app.use("/tokenGoogle",token)
 app.use("/total", totalModule);
 
 // catch 404 and forward to error handler
