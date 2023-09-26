@@ -10,10 +10,6 @@ const categorySchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  total: {
-    type: Number,
-    default: 0,
-  },
 });
 
 const Category = mongoose.model("Category", categorySchema);
