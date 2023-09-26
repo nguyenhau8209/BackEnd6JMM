@@ -160,7 +160,7 @@ exports.verifyEmail = async (req, res) => {
 // Controller đăng xuất
 exports.logout = async (req, res, next) => {
   try {
-     // Xóa token của người dùng để đăng xuất
+    // Xóa token của người dùng để đăng xuất
     req.user.token = null;
     await req.user.save();
     return res
