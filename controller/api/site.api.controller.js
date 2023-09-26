@@ -71,6 +71,9 @@ exports.register = async (req, res, next) => {
         });
       } else {
         // Nếu tài khoản chưa được xác thực, cập nhật lại thông tin và gửi lại email xác thực
+        // Tạo salt và mã hóa mật khẩu
+        const salt = await bcrypt.genSalt(15);
+        user.password = await bcrypt.hash(req.body.password, salt);
         // Cập nhật thông tin cần thiết (ví dụ: password, thông tin mới)
         checkEmail.password = user.password; // Thay đổi mật khẩu nếu cần
         // Cập nhật thông tin khác nếu cần

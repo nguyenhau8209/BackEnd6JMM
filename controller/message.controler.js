@@ -8,11 +8,12 @@ const returnTotal = require("../utils/total");
 // Lấy danh sách tin nhắn
 exports.getListMessage = async (req, res, next) => {
   const userID = req.query.userID;
-  if (!userID) {
-    return returnRes(res, 404, "Invalid userID");
+  const code = req.query.code;
+  if (!userID || !code) {
+    return returnRes(res, 404, "Invalid userID or code");
   }
   try {
-    const messageList = await messageModel.message.find({ userID });
+    const messageList = await messageModel.message.find({ userID, code });
 
     // Kiểm tra nếu không có tin nhắn
     if (!messageList) {
