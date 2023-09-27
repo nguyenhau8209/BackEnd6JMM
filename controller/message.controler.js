@@ -13,6 +13,10 @@ exports.getListMessage = async (req, res, next) => {
     return returnRes(res, 404, "Invalid userID or code");
   }
   try {
+    //Kiểm tra xem userID có trùng với userID được truyền lên không
+    if (req.data._id !== userID) {
+      return returnRes(res, 401, "Unauthorized");
+    }
     const messageList = await messageModel.message.find({ userID, code });
 
     // Kiểm tra nếu không có tin nhắn
@@ -60,6 +64,10 @@ exports.createMessage = async (req, res, next) => {
       message.price = req.body.price;
       if (!req.body.message || !req.body.userID) {
         return returnRes(res, 404, "invalid message || userID");
+      }
+      //Kiểm tra xem userID có trùng với userID được truyền lên không
+      if (req.data._id !== userID) {
+        return returnRes(res, 401, "Unauthorized");
       }
       const findUserID = await acount.findById(req.body.userID);
       console.log(findUserID);

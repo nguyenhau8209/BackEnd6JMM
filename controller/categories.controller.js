@@ -8,7 +8,7 @@ exports.getCategories = async (req, res) => {
   try {
     // Kiểm tra xem có tồn tại userID trong request body không
     if (!userID) {
-      return returnRes(res, 404, "Invalid userID");
+      return res.status(400).json({ status: 400, message: "Invalid UserID" });
     }
     const categories = await Category.find();
     // Lấy tổng theo từng danh mục từ bảng Total
@@ -27,11 +27,13 @@ exports.getCategories = async (req, res) => {
 };
 exports.getCategoriesByUserID = async (req, res) => {
   const userID = req.query.userID;
-  const startDate = req.query.startDate;
-  const endDate = req.query.endDate;
   let codeTotal = [];
 
   try {
+    //Kiểm tra xem userID có trùng với userID được truyền lên không
+    if (req.data._id !== userID) {
+      return res.status(400).json({ status: 400, message: "Unauthorized" });
+    }
     // Kiểm tra xem có tồn tại userID trong request query không
     if (!userID) {
       return res.status(400).json({ status: 400, message: "Invalid userID" });
@@ -82,11 +84,15 @@ exports.getTotalByFillter = async (req, res) => {
   let codeTotal = [];
 
   try {
+    //Kiểm tra xem userID có trùng với userID được truyền lên không
+    if (req.data._id !== userID) {
+      return returnRes(res, 401, "Unauthorized");
+    }
+
     // Kiểm tra xem có tồn tại userID trong request query không
     if (!userID) {
       return res.status(400).json({ status: 400, message: "Invalid userID" });
     }
-
     // Kiểm tra xem startDate và endDate có đúng định dạng ngày không
     if (!isValidDate(startDate) || !isValidDate(endDate)) {
       return res

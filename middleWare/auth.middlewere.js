@@ -30,6 +30,7 @@ const apiAuth = async (req, res, next) => {
     }
     // Gắn thông tin người dùng và token vào yêu cầu
     req.user = user;
+    req.data = data;
     next();
   } catch (error) {
     console.log(error);
