@@ -59,7 +59,7 @@ exports.getCategoriesByUserID = async (req, res) => {
           return accumulator + parseFloat(message.price || 0);
         }, 0);
 
-        codeTotal.push({ category: category, total: total });
+        codeTotal.push({ ...category.toJSON(), total });
       })
     );
 
@@ -117,7 +117,7 @@ exports.getTotalByFillter = async (req, res) => {
           return accumulator + parseFloat(message.price || 0);
         }, 0);
 
-        codeTotal.push({ category: category, total: total });
+        codeTotal.push({ ...category.toJSON(), total });
       })
     );
 
