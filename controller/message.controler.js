@@ -66,7 +66,7 @@ exports.createMessage = async (req, res, next) => {
         return returnRes(res, 404, "invalid message || userID");
       }
       //Kiểm tra xem userID có trùng với userID được truyền lên không
-      if (req.data._id !== userID) {
+      if (req.data._id !== req.body.userID) {
         return returnRes(res, 401, "Unauthorized");
       }
       const findUserID = await acount.findById(req.body.userID);
