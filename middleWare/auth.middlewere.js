@@ -28,8 +28,8 @@ const apiAuth = async (req, res, next) => {
     if (!user) {
       throw new Error("unknown user");
     }
-
     // Gắn thông tin người dùng và token vào yêu cầu
+    req.user = user;
     next();
   } catch (error) {
     console.log(error);
