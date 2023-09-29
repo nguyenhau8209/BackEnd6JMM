@@ -8,6 +8,11 @@ dotenv.config();
 // Controller xử lý việc đăng nhập
 exports.login = async (req, res, next) => {
   try {
+    if (!req.body.email || !req.body.password) {
+      return res
+        .status(401)
+        .json({ status: 401, message: "Email or password is not empty" });
+    }
     // Gọi phương thức findByCredentials từ model để kiểm tra thông tin đăng nhập
     const result = await acountModel.acount.findByCredentials(
       req.body.email,
@@ -55,9 +60,14 @@ exports.login = async (req, res, next) => {
 // Controller xử lý việc đăng ký
 exports.register = async (req, res, next) => {
   try {
+    console.log(req.body);
+    if (!req.body.email || !req.body.password) {
+      return res
+        .status(401)
+        .json({ status: 401, message: "Invalid email, password" });
+    }
     // Tạo một tài khoản mới từ dữ liệu đầu vào
     const user = new acountModel.acount(req.body);
-
     // Kiểm tra xem email đã tồn tại chưa
     const checkEmail = await acountModel.acount.findOne({ email: user.email });
 
