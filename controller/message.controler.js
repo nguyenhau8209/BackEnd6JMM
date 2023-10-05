@@ -5,6 +5,53 @@ const returnRes = require("../utils/config");
 const runPrompt = require("../utils/convertMessage");
 const returnTotal = require("../utils/total");
 
+exports.getMessageFilter = async (req, res) => {
+    const {
+        userid,
+        code,
+        startDate,
+        endDate,
+        limit,
+        skip,
+        sortDate,
+        sortPrice,
+    } = req.query
+
+    if (!userid) {
+        return returnRes(res, 404, 'Invalid userID')
+    }
+    try {
+        const query = {
+            userID: userid,
+            code: code,
+            createdAt: { $gte: startDate, $lte: endDate },
+        }
+
+        let sortOption = {}
+        if (sortPrice) {
+            sortOption = { price: sortPrice === 'true' ? 1 : -1 }
+        } else if (sortDate) {
+            sortOption = { createdAt: sortDate === 'true' ? 1 : -1 }
+        }
+
+        const messageList = await messageModel.message
+            .find(query)
+            .sort(sortOption)
+            .limit(limit)
+            .skip(skip)
+            .exec()
+
+        if (!messageList) {
+            return returnRes(res, 401, 'get list message false!')
+        }
+
+        return returnRes(res, 200, messageList, 'get list message success')
+    } catch (error) {
+        console.log(error)
+        return returnRes(res, 500, error.message)
+    }
+}
+
 // Lấy danh sách tin nhắn
 exports.getListMessage = async (req, res, next) => {
   const userID = req.query.userID;
@@ -152,97 +199,6 @@ exports.deleteMessage = async (req, res, next) => {
     return res
       .status(201)
       .json({ status: 201, message: "delete successfully!" });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({ status: 500, message: error.message });
-  }
-};
-
-// Lấy list message theo limit
-exports.loadMoreMessages = async (req, res, next) => {
-  try {
-    const { userId, code, limit, skip } = req.query; // Nhận limit và skip từ frontend
-
-    // Chuyển limit và skip thành số nguyên
-    const limitInt = parseInt(limit);
-    const skipInt = parseInt(skip);
-
-    // Lấy danh sách tin nhắn dựa trên limit và skip
-    const messageList = await messageModel.message
-      .find({ code: code, userID: userId })
-      .limit(limitInt)
-      .skip(skipInt);
-
-    // Kiểm tra nếu không có tin nhắn
-    if (!messageList) {
-      return res
-        .status(401)
-        .json({ status: 401, message: "No more messages found" });
-    }
-
-    return res.status(200).json({
-      status: 200,
-      data: messageList,
-      message: "Get messages successfully!",
-    });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({ status: 500, message: error.message });
-  }
-};
-// Hàm "filterMessages" để lọc danh sách tin nhắn theo các yêu cầu
-exports.filterMessagesbyCode = async (req, res, next) => {
-  try {
-    const { code, userid } = req.query; // Nhận startDate và endDate từ frontend
-
-    // Truy vấn MongoDB để lọc theo "code" và khoảng thời gian
-    const messageList = await messageModel.message.find({
-      code: code,
-      userID: userid, // Thay thế bằng "code" bạn muốn lọc
-    });
-
-    // Kiểm tra nếu không có tin nhắn
-    if (!messageList) {
-      return res
-        .status(404)
-        .json({ status: 404, message: "No messages found" });
-    }
-
-    return res.status(200).json({
-      status: 200,
-      data: messageList,
-      message: `Messages filtered by code and date range`,
-    });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({ status: 500, message: error.message });
-  }
-};
-
-// Hàm "filterMessages" để lọc danh sách tin nhắn theo các yêu cầu
-exports.filterMessagesbyCodeANDTime = async (req, res, next) => {
-  try {
-    const { code, startDate, endDate, userid } = req.query; // Nhận startDate và endDate từ frontend
-
-    // Truy vấn MongoDB để lọc theo "code" và khoảng thời gian
-    const messageList = await messageModel.message.find({
-      code: code, // Thay thế bằng "code" bạn muốn lọc
-      createdAt: { $gte: startDate, $lte: endDate },
-      userID: userid,
-    });
-
-    // Kiểm tra nếu không có tin nhắn
-    if (!messageList) {
-      return res
-        .status(404)
-        .json({ status: 404, message: "No messages found" });
-    }
-
-    return res.status(200).json({
-      status: 200,
-      data: messageList,
-      message: `Messages filtered by code and date range`,
-    });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ status: 500, message: error.message });

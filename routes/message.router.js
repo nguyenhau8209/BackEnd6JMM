@@ -4,10 +4,15 @@ const messageController = require("../controller/message.controler");
 const authMidleWare = require("../middleWare/auth.middlewere");
 
 router.get(
-  "/messages",
-  authMidleWare.apiAuth,
-  messageController.getListMessage
-);
+    '/messages',
+    authMidleWare.apiAuth,
+    messageController.getListMessage
+)
+router.get(
+    '/messages/filter',
+    authMidleWare.apiAuth,
+    messageController.getMessageFilter
+)
 
 router.get(
   "/message/:id",
@@ -28,23 +33,4 @@ router.delete(
   messageController.deleteMessage
 );
 
-router.get(
-  "/loadmore-message",
-  // ?limit=$limit&skip=$skip
-  // authMidleWare.apiAuth,
-  messageController.loadMoreMessages
-);
-
-router.get(
-  "/filter-message",
-  // authMidleWare.apiAuth,
-  messageController.filterMessagesbyCodeANDTime
-);
-
-router.get(
-  "/messagesbyCode",
-  authMidleWare.apiAuth,
-  messageController.filterMessagesbyCode
-);
-
-module.exports = router;
+module.exports = router
