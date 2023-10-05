@@ -12,6 +12,12 @@ router.get(
 router.get(
   "/categories2",
   authMidleWare.apiAuth,
-  categoryController.getCategories2
+  categoryController.getCategoriesByUserID
+);
+
+router.get(
+  "/filterbydate",
+  authMidleWare.apiAuth,
+  categoryController.getTotalByFillter
 );
 module.exports = router;

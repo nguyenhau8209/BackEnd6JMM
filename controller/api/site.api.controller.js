@@ -8,6 +8,11 @@ dotenv.config();
 // Controller xử lý việc đăng nhập
 exports.login = async (req, res, next) => {
   try {
+    if (!req.body.email || !req.body.password) {
+      return res
+        .status(401)
+        .json({ status: 401, message: "Email or password is not empty" });
+    }
     // Gọi phương thức findByCredentials từ model để kiểm tra thông tin đăng nhập
     const result = await acountModel.acount.findByCredentials(
       req.body.email,
@@ -55,9 +60,14 @@ exports.login = async (req, res, next) => {
 // Controller xử lý việc đăng ký
 exports.register = async (req, res, next) => {
   try {
+    console.log(req.body);
+    if (!req.body.email || !req.body.password) {
+      return res
+        .status(401)
+        .json({ status: 401, message: "Invalid email, password" });
+    }
     // Tạo một tài khoản mới từ dữ liệu đầu vào
     const user = new acountModel.acount(req.body);
-
     // Kiểm tra xem email đã tồn tại chưa
     const checkEmail = await acountModel.acount.findOne({ email: user.email });
 
@@ -71,6 +81,9 @@ exports.register = async (req, res, next) => {
         });
       } else {
         // Nếu tài khoản chưa được xác thực, cập nhật lại thông tin và gửi lại email xác thực
+        // Tạo salt và mã hóa mật khẩu
+        const salt = await bcrypt.genSalt(15);
+        user.password = await bcrypt.hash(req.body.password, salt);
         // Cập nhật thông tin cần thiết (ví dụ: password, thông tin mới)
         checkEmail.password = user.password; // Thay đổi mật khẩu nếu cần
         // Cập nhật thông tin khác nếu cần
@@ -160,7 +173,6 @@ exports.logout = async (req, res, next) => {
     // Xóa token của người dùng để đăng xuất
     req.user.token = null;
     await req.user.save();
-
     return res
       .status(200)
       .json({ status: 200, message: "Logout successfully!" });

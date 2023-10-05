@@ -17,7 +17,7 @@ const apiAuth = async (req, res, next) => {
 
   try {
     // Xác minh và giải mã token
-    const data = jwt.verify(token, SIGN_PRIVATE);
+    const data = jwt.verify(token, SIGN_PRIVATE,);
     console.log("data ", data);
 
     // Tìm người dùng dựa trên dữ liệu từ token
@@ -28,8 +28,9 @@ const apiAuth = async (req, res, next) => {
     if (!user) {
       throw new Error("unknown user");
     }
-
     // Gắn thông tin người dùng và token vào yêu cầu
+    req.user = user;
+    req.data = data;
     next();
   } catch (error) {
     console.log(error);
