@@ -10,7 +10,7 @@ router.get(
 )
 router.get(
     '/messages/filter',
-    authMidleWare.apiAuth,
+    // authMidleWare.apiAuth,
     messageController.getMessageFilter
 )
 
