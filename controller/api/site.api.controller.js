@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const Token = require("../../models/token.model");
 const sendEmail = require("../../utils/email");
 const dotenv = require("dotenv");
+const { message } = require("../../models/message.model");
 dotenv.config();
 
 // Controller xử lý việc đăng nhập
@@ -202,6 +203,124 @@ exports.detailProfile = async (req, res, next) => {
       .json({ status: 200, data: user, message: "get profile success" });
   } catch (error) {
     console.error(error);
+    return res.status(500).json({ status: 500, message: error.message });
+  }
+};
+
+function generateRandomPassword(length) {
+  const charset =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~`|}{[]:;?><,./-=";
+  let password = "";
+
+  for (let i = 0; i < length; i++) {
+    const randomIndex = Math.floor(Math.random() * charset.length);
+    password += charset[randomIndex];
+  }
+
+  return password;
+}
+
+exports.forgotPassword = async (req, res) => {
+  const { email } = req.body;
+  console.log(email);
+  try {
+    if (!email) {
+      return res
+        .status(401)
+        .json({ status: 401, message: "Invalid email or new password" });
+    }
+    const randomPassword = generateRandomPassword(8); // Thay đổi số 8 thành chiều dài mà bạn muốn cho mật khẩu
+    console.log(randomPassword);
+    // Tạo một tài khoản mới từ dữ liệu đầu vào
+    const user = new acountModel.acount({
+      email: email,
+      password: randomPassword,
+    });
+    const findEmail = await acountModel.acount.findOne({ email: user.email });
+    console.log(findEmail);
+    if (!findEmail) {
+      return res.status(404).json({ status: 404, message: "email not found" });
+    }
+    //Tao va luu token xac minh email
+    let newVerificationToken = await new Token({
+      userId: findEmail._id,
+      token: require("crypto").randomBytes(32).toString("hex"),
+    }).save();
+    const emailMessage = `${process.env.BASE_URL}users/forgotPassword/${findEmail.id}/${newVerificationToken.token}?password=${randomPassword}`;
+    await sendEmail(findEmail.email, "Reverify Email", emailMessage);
+    return res.status(201).json({
+      status: 201,
+      data: user,
+      message:
+        "An email has been sent to your account. Please verify your email.",
+    });
+  } catch (error) {
+    return res.status(500).json({ status: 500, message: error.message });
+  }
+};
+exports.verifyEmailChangePassword = async (req, res) => {
+  try {
+    // Tìm tài khoản dựa trên ID trong đường dẫn
+    const user = await acountModel.acount.findOne({ _id: req.params.id });
+
+    // Kiểm tra xem tài khoản có tồn tại không
+    if (!user) return res.status(400).json({ message: "Invalid link" });
+
+    // Tìm token xác minh trong cơ sở dữ liệu
+    const token = await Token.findOne({
+      userId: user._id,
+      token: req.params.token,
+    });
+
+    // Kiểm tra xem token có tồn tại không
+    if (!token) return res.status(400).json({ message: "Invalid link" });
+    const newPassword = req.query.password;
+    const salt = await bcrypt.genSalt(15);
+    const password = await bcrypt.hash(newPassword, salt);
+    // Xác minh email và loại bỏ token đã sử dụng
+    await acountModel.acount.findByIdAndUpdate(user._id, {
+      password: password,
+    });
+    await Token.findByIdAndRemove(token._id);
+    await sendEmail(
+      user.email,
+      "Forgot password",
+      `Change password successfully! New your password is: ${newPassword}`
+    );
+    return res.status(200).json({
+      status: 200,
+      message: "Change password successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(400).json({ status: 400, message: "An error occurred" });
+  }
+};
+
+exports.changePassword = async (req, res) => {
+  const { newPassword, reNewPassword } = req.body;
+  if (newPassword !== reNewPassword) {
+    return res
+      .status(400)
+      .json({
+        status: 400,
+        message: "password and repassword are not the same",
+      });
+  }
+  try {
+    if (!req.user) {
+      return res.status(401).json({ status: 401, message: "Unauthorized" });
+    }
+    const salt = await bcrypt.genSalt(15);
+    const changedPassword = await bcrypt.hash(newPassword, salt);
+    //find and update user
+    const user = await acountModel.acount.findByIdAndUpdate(req.user._id, {
+      password: changedPassword,
+    });
+    return res
+      .status(201)
+      .json({ status: 201, message: "Change password successfully!" });
+  } catch (error) {
     return res.status(500).json({ status: 500, message: error.message });
   }
 };
