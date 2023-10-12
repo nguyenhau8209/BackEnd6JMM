@@ -6,51 +6,70 @@ const runPrompt = require("../utils/convertMessage");
 const returnTotal = require("../utils/total");
 
 exports.getMessageFilter = async (req, res) => {
-    const {
-        userid,
-        code,
-        startDate,
-        endDate,
-        limit,
-        skip,
-        sortDate,
-        sortPrice,
-    } = req.query
+  const {
+    userID, // required
+    code, // required
+    startDate,
+    endDate,
+    sortPrice,
+    sortDate,
+    limit, // required
+    skip, // required
+  } = req.query;
 
-    if (!userid) {
-        return returnRes(res, 404, 'Invalid userID')
+  if (!userID) {
+    return returnRes(res, 404, "Invalid userID");
+  }
+
+  try {
+    const query = {
+      userID: userID,
+      code: code,
+    };
+
+    // Xác định điều kiện lọc theo ngày nếu startDate và endDate được truyền vào
+    if (startDate && endDate) {
+      query.createdAt = { $gte: startDate, $lte: endDate };
     }
-    try {
-        const query = {
-            userID: userid,
-            code: code,
-            createdAt: { $gte: startDate, $lte: endDate },
-        }
 
-        let sortOption = {}
-        if (sortPrice) {
-            sortOption = { price: sortPrice === 'true' ? 1 : -1 }
-        } else if (sortDate) {
-            sortOption = { createdAt: sortDate === 'true' ? 1 : -1 }
-        }
+    const messageList = await messageModel.message.find(query).exec();
 
-        const messageList = await messageModel.message
-            .find(query)
-            .sort(sortOption)
-            .limit(limit)
-            .skip(skip)
-            .exec()
+    // Chuyển đổi trường "price" thành số
+    messageList.forEach((message) => {
+      message.price = parseInt(message.price);
+    });
 
-        if (!messageList) {
-            return returnRes(res, 401, 'get list message false!')
-        }
-
-        return returnRes(res, 200, messageList, 'get list message success')
-    } catch (error) {
-        console.log(error)
-        return returnRes(res, 500, error.message)
+    // Sắp xếp dựa trên yêu cầu
+    if (sortPrice) {
+      messageList.sort((a, b) => {
+        return sortPrice === "true" ? a.price - b.price : b.price - a.price;
+      });
+    } else if (sortDate) {
+      messageList.sort((a, b) => {
+        return sortDate === "true"
+          ? a.createdAt - b.createdAt
+          : b.createdAt - a.createdAt;
+      });
+    } else {
+      // Mặc định sắp xếp theo ngày mới nhất trước
+      messageList.sort((a, b) => {
+        return b.createdAt - a.createdAt;
+      });
     }
-}
+
+    // Áp dụng phân trang bằng cách sử dụng limit và skip
+    const paginatedList = messageList.slice(skip, skip + limit);
+
+    if (!paginatedList) {
+      return returnRes(res, 401, "get list message false!");
+    }
+
+    return returnRes(res, 200, paginatedList, "get list message success");
+  } catch (error) {
+    console.log(error);
+    return returnRes(res, 500, error.message);
+  }
+};
 
 // Lấy danh sách tin nhắn
 exports.getListMessage = async (req, res, next) => {
